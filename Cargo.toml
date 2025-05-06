@@ -1,0 +1,9 @@
+[package]
+name = "HID2221"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embedded-hal = "0.2.6"
+hidapi = "2.6.3"
+mcp2221 = "0.1.1"
