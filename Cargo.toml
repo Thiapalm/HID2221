@@ -1,9 +1,11 @@
 [package]
-name = "HID2221"
+name = "ONT"
 version = "0.1.0"
 edition = "2024"
+author = "thiago.palmieri@gmail.com"
 
 [dependencies]
+clap = { version = "4.5.37", features = ["derive"] }
 embedded-hal = "0.2.6"
 hidapi = "2.6.3"
 mcp2221 = "0.1.1"

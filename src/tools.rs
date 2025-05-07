@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Register {
     Iodir = 0x00,
@@ -13,12 +14,14 @@ pub enum Register {
     Olat = 0x14,
 }
 
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Port {
     Porta = 0x00,
     Portb = 0x01,
 }
 
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Pin {
     Pin0 = 0x01,
@@ -32,21 +35,15 @@ pub enum Pin {
     Invalid = 0x00,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum Setclear {
-    Clear,
-    Set,
-}
-
+#[allow(dead_code)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Direction {
     Output = 0x00,
     Input = 0xFF,
 }
 
-static MCP23017_ADDRESS: u8 = 0x20;
-static MCP23017_IODIRA: u8 = 0x00;
-static MCP23017_GPIOA: u8 = 0x12;
+#[allow(dead_code)]
+pub static MCP23017_ADDRESS: u8 = 0x20;
 
 /**
  * This function is used to set a given bit. It must receive the byte to be changed
@@ -68,6 +65,14 @@ pub fn bit_clear(byte: u8, pin: Pin) -> u8 {
  * This function reads a given bit from a byte. It must receive the byte and
  * the pin number to be read
  */
+#[allow(dead_code)]
 pub fn bit_read(byte: u8, pin: Pin) -> u8 {
     (byte & pin as u8) >> (pin as u8)
+}
+
+#[allow(dead_code)]
+trait DefaultActions {
+    fn start(&self);
+    fn stop(&self);
+    fn restart(&self);
 }
