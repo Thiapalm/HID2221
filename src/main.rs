@@ -51,6 +51,7 @@ enum Actions {
 fn start_device() -> mcp2221::Handle {
     let mut config = mcp2221::Config::default();
     config.i2c_speed_hz = 400_000;
+    config.reset_on_open = false;
     // For talking to a peripheral we might want a higher timeout, but for
     // scanning the bus, a short timeout is good since it allows us to scan all
     // addresses more quickly.

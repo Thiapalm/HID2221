@@ -65,9 +65,8 @@ pub fn bit_clear(byte: u8, pin: Pin) -> u8 {
  * This function reads a given bit from a byte. It must receive the byte and
  * the pin number to be read
  */
-#[allow(dead_code)]
 pub fn bit_read(byte: u8, pin: Pin) -> u8 {
-    (byte & pin as u8) >> (pin as u8)
+    byte & pin as u8
 }
 
 #[allow(dead_code)]
