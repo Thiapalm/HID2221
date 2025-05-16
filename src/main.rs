@@ -1,8 +1,10 @@
 use embedded_hal::blocking::i2c::Read;
 use std::{process::exit, thread::sleep, time::Duration};
+mod powmon;
 mod tools;
 
 use clap::{Parser, Subcommand};
+use powmon::*;
 use tools::*;
 
 #[derive(Parser)]
@@ -32,6 +34,8 @@ enum Commands {
         //valid actions: Start, Stop, Restart
         action: Actions,
     },
+    /// Used to read Voltage, Current and Power
+    Powmon { readings: PowRead },
     /// Search for device
     Scan,
 }
@@ -46,6 +50,31 @@ enum Actions {
     Restart,
     ///Status
     Status,
+}
+
+#[derive(clap::ValueEnum, Copy, Clone, PartialEq, Eq, Debug)]
+enum PowRead {
+    /// Check device status
+    Status,
+    /// Voltage read
+    Voltage,
+    /// Current read
+    Amps,
+    /// Power read
+    Power,
+    /// Read Shunt voltage
+    Shunt,
+    /// Reset chip
+    Reset,
+}
+
+#[derive(Parser, Copy, Clone, PartialEq, Eq, Debug)]
+#[command(version, about, long_about = None)]
+struct Config {
+    mode: Option<u8>,
+    vbusct: Option<u8>,
+    vscht: Option<u8>,
+    average: Option<u8>,
 }
 
 fn start_device() -> mcp2221::Handle {
@@ -161,26 +190,47 @@ fn main() {
                 println!();
             }
         }
+        Some(Commands::Powmon { readings: x }) => match x {
+            PowRead::Status => match verify_hardware(&mut dev, 0x4A) {
+                Ok(()) => {
+                    println!("Device Found !");
+                    let (x, y) = read_configuration(&mut dev, 0x4A);
+                    println!("Configuration: {:?} 0b{:16b}", x, y);
+                }
+                Err(x) => {
+                    println!("Error: {}", x);
+                }
+            },
+            PowRead::Voltage => {
+                config_hardware(&mut dev, 0x4A);
+                calibrate(&mut dev, 0x4A, 5.0);
+                let result = read_volts(&mut dev, 0x4A);
+                println!("{} V", result);
+            }
+            PowRead::Amps => {
+                config_hardware(&mut dev, 0x4A);
+                calibrate(&mut dev, 0x4A, 5.0);
+                let result = read_amps(&mut dev, 0x4A);
+                println!("{} A", result);
+            }
+            PowRead::Power => {
+                config_hardware(&mut dev, 0x4A);
+                calibrate(&mut dev, 0x4A, 5.0);
+                let result = read_power(&mut dev, 0x4A);
+                println!("{} W", result);
+            }
+            PowRead::Shunt => {
+                config_hardware(&mut dev, 0x4A);
+                calibrate(&mut dev, 0x4A, 5.0);
+                let result = read_shunt(&mut dev, 0x4A);
+                println!("{} V", result);
+            }
+            PowRead::Reset => {
+                reset(&mut dev, 0x4A);
+                println!("Reset!");
+            }
+        },
         None => {}
-    }
-}
-
-fn read_register(dev: &mut mcp2221::Handle, reg: Register, port: Port) -> u8 {
-    let mut read: [u8; 1] = [0; 1];
-    let mut result: [u8; 1] = [0; 1];
-    read[0] = reg as u8 | port as u8;
-    let _ = dev.write_read_address(0x20, &mut read, &mut result);
-
-    result[0]
-}
-
-fn write_register(dev: &mut mcp2221::Handle, port: Port, reg: Register, value: u8) {
-    let mut result: [u8; 2] = [0; 2];
-    result[0] = reg as u8 | port as u8;
-    result[1] = value;
-    match dev.write_read_address(0x20, &mut result, &mut [0u8]) {
-        Ok(()) => (),
-        Err(x) => println!("Error: {}", x),
     }
 }
 
